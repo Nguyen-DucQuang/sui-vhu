@@ -1,6 +1,6 @@
-# Sui AI NFT Market 2025
+# Sui AI NFT Market 2025 - Nexus AI Marketplace
 
-Dự án NFT Marketplace hoàn chỉnh tích hợp Trí tuệ nhân tạo (AI) trên mạng lưới Sui.
+Thị trường NFT nâng cao AI trên Sui blockchain với các tính năng đánh giá giá trị, mẹo đầu tư và phân loại tự động.
 
 ## Tính năng chính
 

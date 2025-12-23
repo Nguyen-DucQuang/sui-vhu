@@ -1,13 +1,49 @@
 import React, { useState } from 'react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import Toast from '../../../components/ui/Toast';
 
 const PriceSection = ({ nft }) => {
+  const currentAccount = useCurrentAccount();
   const [showPriceAlert, setShowPriceAlert] = useState(false);
   const [alertPrice, setAlertPrice] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const handleBuyNow = () => {
-    console.log('Initiating purchase for:', nft?.name);
+    if (!currentAccount) {
+      setToast({
+        message: 'Vui lòng kết nối ví Sui để thực hiện mua hàng!',
+        type: 'warning'
+      });
+      return;
+    }
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmPurchase = () => {
+    // Save to localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('sui_nft_orders') || '[]');
+    const newOrder = {
+      id: `ORD-${Date.now()}`,
+      name: nft?.name,
+      collection: nft?.collection,
+      price: nft?.price,
+      image: nft?.image,
+      date: new Date().toLocaleDateString('vi-VN'),
+      status: 'Đã hoàn thành'
+    };
+    localStorage.setItem('sui_nft_orders', JSON.stringify([newOrder, ...existingOrders]));
+    
+    // Trigger Header update
+    window.dispatchEvent(new Event('ordersUpdated'));
+
+    setToast({
+      message: `Chúc mừng! Bạn đã mua thành công ${nft?.name}`,
+      type: 'success'
+    });
+    setIsConfirmModalOpen(false);
   };
 
   const handleMakeOffer = () => {
@@ -152,6 +188,67 @@ const PriceSection = ({ nft }) => {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
+      {/* Confirmation Modal */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-in">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Icon name="ShoppingCart" size={24} color="var(--color-primary)" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-foreground">Xác nhận mua hàng</h3>
+            </div>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl">
+                <img src={nft?.image} alt={nft?.name} className="w-16 h-16 rounded-lg object-cover" />
+                <div>
+                  <p className="font-bold text-foreground">{nft?.name}</p>
+                  <p className="text-sm text-muted-foreground">{nft?.collection}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-muted-foreground">Giá sản phẩm</span>
+                <span className="font-bold text-foreground">{nft?.price} SUI</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-muted-foreground">Phí mạng lưới (ước tính)</span>
+                <span className="text-foreground">~0.001 SUI</span>
+              </div>
+              <div className="flex justify-between items-center py-2 pt-4">
+                <span className="font-bold text-foreground">Tổng cộng</span>
+                <span className="text-xl font-bold text-primary">{nft?.price} SUI</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="flex-1 px-6 py-3 bg-muted hover:bg-muted/80 rounded-xl font-medium transition-smooth"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={confirmPurchase}
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-medium transition-smooth shadow-lg shadow-primary/20"
+              >
+                Xác nhận Mua
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

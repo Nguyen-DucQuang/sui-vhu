@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCurrentAccount, ConnectButton } from '@mysten/dapp-kit';
+import { useCurrentAccount, ConnectButton, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -14,6 +15,7 @@ import NFTPreview from './components/NFTPreview';
 const NFTUpload = () => {
   const navigate = useNavigate();
   const account = useCurrentAccount();
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,11 +107,45 @@ const NFTUpload = () => {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const txb = new Transaction();
+      // Replace with your actual package ID after deployment
+      const PACKAGE_ID = "0x..."; 
+      
+      txb.moveCall({
+        target: `${PACKAGE_ID}::nft_nexus::mint_to_sender`,
+        arguments: [
+          txb.pure(metadata.name),
+          txb.pure(metadata.description),
+          txb.pure("https://gateway.pinata.cloud/ipfs/Qm..."), // Mock URL
+          txb.pure(85), // Mock AI score
+        ],
+      });
+
+      signAndExecuteTransaction(
+        {
+          transaction: txb,
+          chain: 'sui:testnet',
+        },
+        {
+          onSuccess: (result) => {
+            console.log('NFT minted successfully', result);
+            setIsSubmitting(false);
+            alert('NFT đã được tạo thành công trên Sui Testnet!');
+            navigate('/wallet-management');
+          },
+          onError: (error) => {
+            console.error('Minting failed', error);
+            setIsSubmitting(false);
+            alert('Lỗi khi tạo NFT: ' + error.message);
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Transaction preparation failed', error);
       setIsSubmitting(false);
-      alert('NFT đã được tạo thành công! Đang chuyển đến trang quản lí ví...');
-      navigate('/wallet-management');
-    }, 3000);
+      alert('Lỗi chuẩn bị giao dịch');
+    }
   };
 
   return (

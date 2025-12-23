@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import Toast from '../../components/ui/Toast';
 import FilterPanel from './components/FilterPanel';
 import NFTCard from './components/NFTCard';
 import FeaturedCollections from './components/FeaturedCollections';
@@ -10,7 +12,11 @@ import SearchBar from './components/SearchBar';
 import GasTracker from './components/GasTracker';
 
 const NFTMarketplace = () => {
+  const currentAccount = useCurrentAccount();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedNFT, setSelectedNFT] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
   const [currentSort, setCurrentSort] = useState('relevance');
   const [filters, setFilters] = useState({
     categories: [],
@@ -144,7 +150,42 @@ const NFTMarketplace = () => {
   };
 
   const handleQuickBuy = (nft) => {
-    console.log('Quick buy:', nft);
+    if (!currentAccount) {
+      setToast({
+        message: 'Vui lòng kết nối ví Sui để thực hiện mua hàng!',
+        type: 'warning'
+      });
+      return;
+    }
+    setSelectedNFT(nft);
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmPurchase = () => {
+    console.log('Confirmed purchase for:', selectedNFT);
+    
+    // Save to localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('sui_nft_orders') || '[]');
+    const newOrder = {
+      id: `ORD-${Date.now()}`,
+      name: selectedNFT?.name,
+      collection: selectedNFT?.collection,
+      price: selectedNFT?.price,
+      image: selectedNFT?.image,
+      date: new Date().toLocaleDateString('vi-VN'),
+      status: 'Đã hoàn thành'
+    };
+    localStorage.setItem('sui_nft_orders', JSON.stringify([newOrder, ...existingOrders]));
+    
+    // Trigger Header update
+    window.dispatchEvent(new Event('ordersUpdated'));
+
+    setToast({
+      message: `Chúc mừng! Bạn đã mua thành công ${selectedNFT?.name}`,
+      type: 'success'
+    });
+    setIsConfirmModalOpen(false);
+    setSelectedNFT(null);
   };
 
   const filteredNFTCount = mockNFTs?.length;
@@ -160,7 +201,7 @@ const NFTMarketplace = () => {
         <div className="container mx-auto px-4 md:px-6 lg:px-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-3 md:mb-4">
-              Thị trường iNFT 2025
+              Thị trường iNFT
             </h1>
             <p className="text-base md:text-lg text-muted-foreground">
               Khám phá và giao dịch NFT thông minh với sự hỗ trợ của AI trên Sui
@@ -260,6 +301,66 @@ const NFTMarketplace = () => {
           </div>
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-in">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Icon name="ShoppingCart" size={24} color="var(--color-primary)" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-foreground">Xác nhận mua hàng</h3>
+            </div>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl">
+                <img src={selectedNFT?.image} alt={selectedNFT?.name} className="w-16 h-16 rounded-lg object-cover" />
+                <div>
+                  <p className="font-bold text-foreground">{selectedNFT?.name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedNFT?.collection}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-muted-foreground">Giá sản phẩm</span>
+                <span className="font-bold text-foreground">{selectedNFT?.price}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-muted-foreground">Phí mạng lưới (ước tính)</span>
+                <span className="text-foreground">~0.001 SUI</span>
+              </div>
+              <div className="flex justify-between items-center py-2 pt-4">
+                <span className="font-bold text-foreground">Tổng cộng</span>
+                <span className="text-xl font-bold text-primary">{selectedNFT?.price}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="flex-1 px-6 py-3 bg-muted hover:bg-muted/80 rounded-xl font-medium transition-smooth"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={confirmPurchase}
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-medium transition-smooth shadow-lg shadow-primary/20"
+              >
+                Xác nhận Mua
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>);
 
 };

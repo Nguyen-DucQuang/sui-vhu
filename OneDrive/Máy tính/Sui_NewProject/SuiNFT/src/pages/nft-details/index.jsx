@@ -125,7 +125,7 @@ const NFTDetails = () => {
   return (
     <>
       <Helmet>
-        <title>Chi tiết iNFT - {nftData.name} | Sui AI NFT Market 2025</title>
+        <title>Chi tiết iNFT - {nftData.name} | AI NFT Market</title>
         <meta name="description" content={`Xem chi tiết và phân tích AI cho iNFT ${nftData.name}. Giá hiện tại ${nftData.price} SUI với độ tin cậy AI ${nftData.aiConfidence}%.`} />
       </Helmet>
 

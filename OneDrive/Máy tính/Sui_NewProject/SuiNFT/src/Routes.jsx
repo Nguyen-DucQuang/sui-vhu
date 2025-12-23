@@ -9,6 +9,7 @@ import HomepageDashboard from './pages/homepage-dashboard';
 import NFTMarketplace from './pages/nft-marketplace';
 import NFTDetails from './pages/nft-details';
 import MarketAnalysis from './pages/market-analysis';
+import Orders from './pages/orders';
 
 const Routes = () => {
   return (
@@ -24,6 +25,7 @@ const Routes = () => {
         <Route path="/nft-marketplace" element={<NFTMarketplace />} />
         <Route path="/nft-details" element={<NFTDetails />} />
         <Route path="/market-analysis" element={<MarketAnalysis />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

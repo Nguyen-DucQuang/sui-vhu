@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ConnectButton } from '@mysten/dapp-kit';
+import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
 import Icon from '../AppIcon';
 import Button from './Button';
 
 const Header = () => {
   const location = useLocation();
+  const currentAccount = useCurrentAccount();
+  const [orderCount, setOrderCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +50,23 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const updateOrderCount = () => {
+      const orders = JSON.parse(localStorage.getItem('sui_nft_orders') || '[]');
+      setOrderCount(orders.length);
+    };
+
+    updateOrderCount();
+    window.addEventListener('storage', updateOrderCount);
+    // Custom event for same-window updates
+    window.addEventListener('ordersUpdated', updateOrderCount);
+    
+    return () => {
+      window.removeEventListener('storage', updateOrderCount);
+      window.removeEventListener('ordersUpdated', updateOrderCount);
+    };
+  }, []);
+
+  useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -84,21 +103,21 @@ const Header = () => {
       <header className="nav-header">
         <div className="container mx-auto h-full px-6">
           <div className="flex items-center justify-between h-full">
-            <Link to="/homepage-dashboard" className="flex items-center gap-3">
+            <Link to="/homepage-dashboard" className="flex items-center gap-3 flex-shrink-0">
               <div className="nav-header-logo">
                 <Icon name="Zap" size={28} color="var(--color-primary)" />
               </div>
-              <span className="text-xl font-heading font-bold text-foreground hidden sm:block">
-                Sui AI NFT Market 2025
+              <span className="text-xl font-heading font-bold text-foreground hidden sm:block whitespace-nowrap">
+                AI NFT Market
               </span>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-2">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
               {navigationItems?.map((item) => (
                 <Link
                   key={item?.path}
                   to={item?.path}
-                  className={`nav-link ${location?.pathname === item?.path ? 'active' : ''}`}
+                  className={`nav-link whitespace-nowrap ${location?.pathname === item?.path ? 'active' : ''}`}
                 >
                   {item?.label}
                 </Link>
@@ -169,7 +188,20 @@ const Header = () => {
                 )}
               </div>
 
-              <div ref={notificationRef} className="relative">
+              <div ref={notificationRef} className="relative flex items-center gap-2">
+                {currentAccount && (
+                  <Link
+                    to="/orders"
+                    className="relative p-2 hover:bg-muted rounded-lg transition-smooth"
+                    aria-label="Orders"
+                  >
+                    <Icon name="ShoppingCart" size={20} />
+                    {orderCount > 0 && (
+                      <span className="notification-badge">{orderCount}</span>
+                    )}
+                  </Link>
+                )}
+
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className="relative p-2 hover:bg-muted rounded-lg transition-smooth"
