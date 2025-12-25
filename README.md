@@ -168,6 +168,7 @@ npm run start:dev
 
   * Xác minh giao dịch
   * Đồng bộ dữ liệu hiển thị
+  * Minh bạch hóa các giao dịch và có thể kiếm tra trên Sui Scan các giao dịch về chuyển nhượng sở hữu tài sản số (Đang hoàn thiện)
 
 ---
 
