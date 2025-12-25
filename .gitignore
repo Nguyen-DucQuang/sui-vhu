@@ -1,0 +1,12 @@
+﻿# Local env files
+.env
+SuiNFT/.env
+server-nest/.env
+node_modules/
+dist/
+build/
+*.log
+*.sqlite
+.vscode/
+*.tgz
+.move/

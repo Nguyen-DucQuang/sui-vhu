@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  address      String?       @unique
+  email        String?       @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  nfts         NFT[]
+  analyses     AIAnalysis[]
+  invoices     Invoice[]
+  transactions Transaction[]
+}
+
+model NFT {
+  id           String        @id @default(cuid())
+  objectId     String?       @unique
+  name         String?
+  collection   String?
+  image        String?
+  metadata     String?
+  ownerId      String?
+  owner        User?         @relation(fields: [ownerId], references: [id])
+  createdAt    DateTime      @default(now())
+  analyses     AIAnalysis[]
+  transactions Transaction[]
+}
+
+model AIAnalysis {
+  id         String   @id @default(cuid())
+  nftId      String?
+  nft        NFT?     @relation(fields: [nftId], references: [id])
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  source     String
+  result     String
+  confidence Int?
+  createdAt  DateTime @default(now())
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  amount    Float
+  currency  String
+  data      String
+  pdfPath   String?
+  createdAt DateTime @default(now())
+}
+
+model OnChainEvent {
+  id        String   @id @default(cuid())
+  txHash    String   @unique
+  type      String
+  payload   String
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  txHash    String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  nftId     String?
+  nft       NFT?     @relation(fields: [nftId], references: [id])
+  amount    Float
+  currency  String
+  status    String
+  metadata  String
+  createdAt DateTime @default(now())
+}
