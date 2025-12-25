@@ -142,11 +142,21 @@ NEXT_PUBLIC_SUI_RPC=https://fullnode.devnet.sui.io:443
 ### 4️⃣ Chạy ứng dụng
 
 ```bash
+cd "C:\Users\LENOVO\OneDrive\Máy tính\Sui_NewProject\SuiNFT"
+npm install
 npm run dev
 ```
 
 Mở trình duyệt:
-👉 `http://localhost:3000`
+👉 `http://localhost:...`
+
+---
+
+### Có thể Run riêng Admin để xem (Đang hoàn thiện)
+```bash
+cd "C:\Users\LENOVO\OneDrive\Máy tính\Sui_NewProject\server-nest"
+npm install
+npm run start:dev
 
 ---
 
