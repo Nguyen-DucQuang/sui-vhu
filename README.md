@@ -1,99 +1,194 @@
-SuiNFT — Local run & deployment notes
+🌀 Sui AI NFT Market
 
-Quick start (development)
+**Sui AI NFT Market** là một **nền tảng quản lý và chuyển nhượng quyền sở hữu NFT** được xây dựng trên **blockchain Sui**, hỗ trợ người dùng **tạo, hiển thị và chuyển giao NFT thông qua các giao dịch on-chain**.
 
-1) Start backend (server-nest)
+Dự án hướng tới mục tiêu **nghiên cứu – học tập – trình diễn công nghệ Web3**, tập trung vào:
+
+* Trải nghiệm người dùng thân thiện
+* Minh bạch quyền sở hữu tài sản số
+* Ứng dụng công nghệ blockchain Sui vào quản lý NFT
+
+---
+
+## 🎯 Mục tiêu dự án
+
+* Minh họa cách **NFT đại diện cho quyền sở hữu tài sản số**
+* Giảm rào cản tiếp cận blockchain cho người mới
+* Cung cấp một nền tảng demo cho:
+
+  * Sinh viên
+  * Người học Web3
+  * Nhà phát triển blockchain Sui
+
+⚠️ **Dự án không nhằm mục đích thương mại, đầu tư hay trung gian thanh toán.**
+
+---
+
+## ✨ Chức năng chính
+
+### 🧩 Tạo NFT (Mint)
+
+* Người dùng kết nối ví Sui
+* Tạo NFT từ hình ảnh và metadata
+* NFT được ghi nhận quyền sở hữu on-chain
+
+---
+
+### 🔁 Chuyển nhượng quyền sở hữu NFT
+
+* Người sở hữu NFT có thể **chuyển quyền sở hữu NFT sang ví khác**
+* Giao dịch được thực hiện thông qua **ký xác nhận trên blockchain Sui**
+* Hệ thống chỉ ghi nhận trạng thái on-chain, **không xử lý thanh toán**
+
+> Bản chất kỹ thuật:
+> NFT thay đổi trường `owner` trên blockchain thông qua một giao dịch hợp lệ.
+
+---
+
+### 🖼️ Hiển thị & quản lý NFT
+
+* Danh sách NFT đã tạo
+* Xem metadata, người sở hữu hiện tại
+* Phân loại NFT theo collection / creator
+
+---
+
+### 🔗 Kết nối ví Web3
+
+* Kết nối với các ví tương thích Sui (Sui Wallet, Ethos Wallet…)
+* Người dùng **tự ký giao dịch**, nền tảng không lưu private key
+
+---
+
+## 🧠 Giá trị & vấn đề được giải quyết
+
+| Vấn đề thực tế                         | Giải pháp của hệ thống  |
+| -------------------------------------- | ----------------------- |
+| Người mới khó tiếp cận blockchain      | Giao diện Web2-friendly |
+| Khó xác minh quyền sở hữu tài sản số   | NFT on-chain minh bạch  |
+| Thiếu nền tảng demo Web3 cho sinh viên | Marketplace nghiên cứu  |
+| Quản lý NFT rời rạc                    | Hệ thống tập trung      |
+
+---
+
+## 🏗️ Kiến trúc hệ thống
+
+```
+┌────────────────┐
+│   Frontend     │  React / Next.js
+│ (User Interface)
+└───────▲────────┘
+        │
+        │ Gọi API / Ký giao dịch
+        ▼
+┌────────────────┐
+│    Backend     │  Node.js / NestJS
+│ (Business Logic)
+└───────▲────────┘
+        │
+        │ Truy vấn / ghi nhận
+        ▼
+┌────────────────┐
+│ Sui Blockchain │
+│  (On-chain)    │
+└────────────────┘
+        │
+        │  Ghi nhận
+┌────────────────┐
+│ Admin Dashboard│  React / Next.js
+│   (Quản trị)   │
+└───────▲────────┘
+       
+---
+
+## 🛠️ Công nghệ sử dụng
+
+| Thành phần     | Công nghệ                        |
+| -------------- | -------------------------------- |
+| Frontend       | Next.js, TypeScript, TailwindCSS |
+| Admin/Backend  | Node.js / NestJS                 |
+| Blockchain     | Sui Network                      |
+| Smart Contract | Move                             |
+| Wallet         | Sui Wallet, Ethos                |
+| Deploy         | Netlify / Vercel                 |
+
+---
+
+## 🚀 Chạy dự án local
+
+### 1️⃣ Clone repository
 
 ```bash
-cd server-nest
-cp .env.example .env
-# edit .env if needed (ADMIN_JWT_SECRET, DATABASE_URL)
-npm install
-npm run start:dev
+git clone https://github.com/Nguyen-DucQuang/sui-vhu.git
+cd sui-vhu
 ```
 
-2) Start frontend (SuiNFT)
+### 2️⃣ Cài dependencies
 
 ```bash
-cd SuiNFT
 npm install
+# hoặc
+pnpm install
+```
+
+### 3️⃣ Cấu hình môi trường
+
+Tạo file `.env.local`:
+
+```env
+NEXT_PUBLIC_SUI_RPC=https://fullnode.devnet.sui.io:443
+```
+
+### 4️⃣ Chạy ứng dụng
+
+```bash
 npm run dev
 ```
 
-3) Admin demo
+Mở trình duyệt:
+👉 `http://localhost:3000`
 
-- Open frontend URL shown by Vite (e.g. http://localhost:4028)
-- Go to `/admin`, login with Admin / Admin16 (demo)
-- Connect a wallet on the user pages to emit `user_connected` events
-- Upload an NFT from Admin; if backend down, the upload is queued in `localStorage` and can be synced later via "Sync Now"
+---
 
-Production / deploy notes
+## 🔐 Bảo mật & quyền riêng tư
 
-- Set `ADMIN_JWT_SECRET` to a strong secret in production.
-- Replace Basic/demo auth with a proper user store and JWT flows for admin users.
-- Use HTTPS and a reverse proxy (NGINX) or host behind a platform (Vercel/Netlify for frontend, Docker/Kubernetes for backend).
-- Recommended run: build frontend (`npm run build`) and serve static assets behind CDN; run backend with PM2 or Docker and expose port behind TLS.
+* Hệ thống **không lưu private key**
+* Tất cả giao dịch được người dùng **tự ký bằng ví cá nhân**
+* Backend chỉ đóng vai trò:
 
-Health checks & tests
+  * Xác minh giao dịch
+  * Đồng bộ dữ liệu hiển thị
 
-- Backend health: `GET /admin/health`
-- Admin login: `POST /admin/login` with `{ user, pass }` → returns `{ token }`
-- Simulate wallet connect: `POST /users/connect` with `{ address }`
-- Create NFT via API: `POST /admin/nfts` (Bearer token or Basic) with JSON `{ name, description, imageDataUrl }`
-# Sui AI NFT Market 2025 - Nexus AI Marketplace
+---
 
-Thị trường NFT nâng cao AI trên Sui blockchain với các tính năng đánh giá giá trị, mẹo đầu tư và phân loại tự động.
+## ⚠️ Tuyên bố pháp lý (Legal Disclaimer)
 
-## Tính năng chính
+* Dự án mang tính **học thuật và nghiên cứu công nghệ**
+* Không phải sàn giao dịch tài chính
+* Không thực hiện thanh toán
+* Không hỗ trợ đầu tư hay sinh lợi
+* Mọi giao dịch là **chuyển nhượng quyền sở hữu tài sản số (NFT)** thông qua blockchain
+* Mọi giao dịch đều là Ảo và không sử dụng đến tài sản thật
 
-- **Kết nối ví Sui**: Tích hợp `@mysten/dapp-kit` cho phép kết nối mượt mà với Sui Wallet.
-- **iNFT (Intelligent NFTs)**: Hỗ trợ các NFT thông minh có khả năng tương tác và học hỏi.
-- **AI Valuation**: Backend AI dự đoán giá trị NFT dựa trên đặc tính và xu hướng thị trường.
-- **AI Classification**: Tự động phân loại NFT và đánh giá độ hiếm.
-- **Dashboard đầu tư**: Theo dõi portfolio và nhận lời khuyên đầu tư từ AI.
+---
 
-## Cấu trúc dự án
+## 📜 License
 
-- `SuiNFT/`: Frontend React (Vite, Tailwind CSS).
-- `server/`: Backend Node.js/Express (AI API endpoints).
-- `contracts/`: Sui Move smart contracts cho NFT minting.
+This project is licensed under the **MIT License**.
 
-## Hướng dẫn cài đặt
+---
 
-### 1. Cài đặt Sui CLI
-Theo hướng dẫn tại [Sui Documentation](https://docs.sui.io/guides/developer/getting-started/sui-install).
+## 👨‍🎓 Tác giả
 
-### 2. Chạy Smart Contract (Devnet)
-```bash
-cd contracts/nft_nexus
-sui move build
-sui client publish --gas-budget 100000000
-```
+**Nguyen Duc Quang**
+Sinh viên CNTT – Nghiên cứu Web3 & Blockchain Sui
 
-### 3. Chạy Backend AI
-```bash
-cd server
-npm install
-node index.js
-```
+---
 
-### 4. Chạy Frontend
-```bash
-cd SuiNFT
-npm install
-npm run start
-```
+## 📌 Ghi chú cho giám khảo / người xem
 
-## Công nghệ sử dụng
+> Dự án tập trung minh họa cách blockchain Sui được sử dụng để
+> **xác lập và chuyển nhượng quyền sở hữu tài sản số**,
+> không liên quan đến hoạt động thanh toán hay tài chính.
 
-- **Blockchain**: Sui Network, Move Language.
-- **Frontend**: React, @mysten/dapp-kit, Tailwind CSS, Recharts.
-- **Backend**: Node.js, Express.
-- **AI**: Phân tích dữ liệu thị trường thời gian thực (Mocked for prototype).
 
-## Xu hướng NFT 2025
-
-Dự án tập trung vào các xu hướng chủ đạo của năm 2025:
-- Sự trỗi dậy của iNFTs.
-- Token hóa tài sản thực (RWA).
-- AI đóng vai trò thẩm định giá trị và tối ưu hóa danh mục đầu tư.
